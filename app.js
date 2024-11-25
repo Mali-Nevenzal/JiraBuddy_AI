@@ -19,6 +19,7 @@ async function createJiraIssue(projectKey, summary, description, issueType) {
                 },
             },
         };
+        
 
         const response = await fetch(url, {
             method: 'POST',
