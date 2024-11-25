@@ -62,7 +62,7 @@ const description = {
 
 // קריאה לדוגמה לפונקציה
 createJiraIssue(
-    'SCRUM', // מפתח הפרויקט שלך
+    'PLATEPLACE', // מפתח הפרויקט שלך
     'wedding',
      description,
     'Story' // סוג המשימה (לדוגמה: "Task", "Bug")
