@@ -1,8 +1,9 @@
-require('dotenv').config();
-const { GoogleGenerativeAI } = require('@google/generative-ai');
+import dotenv from 'dotenv';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-const generateQuiz = async (projectOrTaskDescription, type, assignee, projectName) => {
+dotenv.config();
 
+export const generateQuiz = async (projectOrTaskDescription, type, assignee, projectName) => {
   const genAI = new GoogleGenerativeAI(process.env.API_KEY);
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
@@ -41,7 +42,7 @@ const generateQuiz = async (projectOrTaskDescription, type, assignee, projectNam
     // Remove non-JSON elements such as code fences
     generatedText = generatedText.replace(/```json|```/g, '').trim();
 
-    //Parse cleaned text into JSON
+    // Parse cleaned text into JSON
     let quizData;
     try {
       quizData = JSON.parse(generatedText);
@@ -49,12 +50,11 @@ const generateQuiz = async (projectOrTaskDescription, type, assignee, projectNam
       console.error('Error parsing generated text to JSON:', parseError);
       throw new Error('Invalid JSON format received from AI');
     }
+
     console.log(quizData);
-    return generatedText;
+    return quizData;
   } catch (error) {
     console.error('Error generating quiz:', error);
     throw new Error('Failed to generate quiz');
   }
 };
-
-generateQuiz("Develop a web site for selling door signs", "project", "Shira Pliskin", "PLATEPLACE");
