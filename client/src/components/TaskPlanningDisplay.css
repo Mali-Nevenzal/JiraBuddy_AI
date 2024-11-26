@@ -1,0 +1,79 @@
+/* סגנונות הכלליים */
+.task-planning-container {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 10px;
+  }
+  
+  .node {
+    margin-left: 20px;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+    position: relative;
+  }
+  
+  /* צביעת סוגי הבעיה */
+  .node-content {
+    padding: 10px;
+    border-radius: 4px;
+  }
+  
+  .node-content.epic {
+    background-color: #f9e6a1;
+  }
+  
+  .node-content.story {
+    background-color: #a1e6f9;
+  }
+  
+  .node-content.task {
+    background-color: #e6f9a1;
+  }
+  
+  .node-content.subtask {
+    background-color: #f9a1a1;
+  }
+  
+  /* ילדים */
+  .children {
+    margin-left: 20px;
+  }
+  
+  /* חיצים או קווים בין האב לילדים */
+  .node:after {
+    content: "";
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    width: 10px;
+    height: 1px;
+    background-color: #000;
+    transform: translateY(-50%);
+  }
+  
+  /* רמות שונות */
+  .level-0 {
+    font-weight: bold;
+    border: 2px solid #333;
+  }
+  
+  .level-1 {
+    border-left: 3px solid #f0ad4e;
+  }
+  
+  .level-2 {
+    border-left: 3px solid #5bc0de;
+  }
+  
+  .level-3 {
+    border-left: 3px solid #5cb85c;
+  }
+  
+  .level-4 {
+    border-left: 3px solid #d9534f;
+  }
+  
+  
