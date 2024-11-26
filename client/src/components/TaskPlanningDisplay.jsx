@@ -1,6 +1,8 @@
 import "./TaskPlanningDisplay.css";
+import JiraIntegration from "./JiraIntegration";
 
 const TaskPlanningDisplay = ({ taskPlanning }) => {
+  
     const renderTaskPlanning = (result) => {
         const platePlan = result.PlatePlan && Array.isArray(result.PlatePlan) ? result.PlatePlan : [];
 
@@ -74,6 +76,8 @@ const TaskPlanningDisplay = ({ taskPlanning }) => {
             {renderTaskPlanning(taskPlanning).map((rootNode) => renderTree(rootNode))}
         </div>
         <button>Add Tasks to your JIRA project.</button>
+        {<JiraIntegration taskPlanning={taskPlanning} />}
+
     </>
     );
 };
