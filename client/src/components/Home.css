@@ -1,0 +1,140 @@
+/* .header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #6f7195;
+    color: white;
+    text-align: center;
+    z-index: 1000;
+    width: 100%;
+}
+
+.project-name {
+    font-size: 2.5em;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.project-description {
+    font-size: 1.2em;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+button {
+    margin-top: 80px;
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.input-form {
+    margin-top: 150px;
+}
+
+body {
+    margin-top: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+}
+
+.jiraLogo {
+    width: 130px;
+    height: auto;
+    transition: transform 0.3s ease;
+    padding-right: 10px;
+}
+
+.aiLogo {
+    width: 140px;
+    height: auto;
+    transition: transform 0.3s ease;
+    padding-left: 10px;
+    padding-bottom: 8px;
+} */
+
+/* סגנונות הכלליים */
+.header-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #6f7195;
+    color: white;
+    text-align: center;
+    z-index: 1000;
+    width: 100%;
+    display: flex;
+    justify-content: space-between; /* הכפתור והלוגואים יהיו בצדדים */
+    padding: 10px 20px; /* קצת מרווחים פנימיים */
+}
+
+.project-name {
+    font-size: 2.5em;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.project-description {
+    font-size: 1.2em;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+button {
+    margin-top: 80px;
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+.input-form {
+    margin-top: 150px;
+}
+
+body {
+    margin-top: 150px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* לוגואים בצד שמאל */
+.logos-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* לוגואים ממוקמים בצד שמאל */
+}
+
+.logo {
+    width: 130px;
+    height: auto;
+    transition: transform 0.3s ease;
+    padding: 5px;
+}

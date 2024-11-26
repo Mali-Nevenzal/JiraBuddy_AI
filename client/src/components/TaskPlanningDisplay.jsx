@@ -5,34 +5,48 @@ const TaskPlanningDisplay = ({ taskPlanning }) => {
         const platePlan = result.PlatePlan && Array.isArray(result.PlatePlan) ? result.PlatePlan : [];
 
         let output = [];
+        const seen = new Set(); // Set to track unique elements based on their unique ID
 
         const renderProjectHierarchy = (project, level = 0) => {
+            const projectId = `${project.Project}-${project["Issue type"]}-${project.Summary}`;
+
+            // Skip if the project is already processed
+            if (seen.has(projectId)) return null;
+            seen.add(projectId);
+
             const projectData = {
                 name: project.Summary,
                 type: project["Issue type"],
                 children: [],
                 level: level,
-                id: `${project.Project}-${project["Issue type"]}-${project.Summary}`,
+                id: projectId,
             };
 
-            if (project.children && Array.isArray(project.children) && project.children.length > 0) {
+            // Process children only if they exist and are an array
+            if (project.children && Array.isArray(project.children)) {
                 project.children.forEach((child) => {
                     const childData = renderProjectHierarchy(child, level + 1);
-                    projectData.children.push(childData);
+                    if (childData) {
+                        projectData.children.push(childData);
+                    }
                 });
             }
 
-            output.push(projectData);
             return projectData;
         };
 
+        // Process the main task plan or individual project
         if (platePlan.length > 0) {
             platePlan.forEach((project) => {
-                renderProjectHierarchy(project);
+                const projectData = renderProjectHierarchy(project);
+                if (projectData) {
+                    output.push(projectData);
+                }
             });
-        } else {
-            if (result.Project) {
-                renderProjectHierarchy(result);
+        } else if (result.Project) {
+            const projectData = renderProjectHierarchy(result);
+            if (projectData) {
+                output.push(projectData);
             }
         }
 
@@ -55,9 +69,12 @@ const TaskPlanningDisplay = ({ taskPlanning }) => {
     };
 
     return (
+    <>
         <div className="task-planning-container">
             {renderTaskPlanning(taskPlanning).map((rootNode) => renderTree(rootNode))}
         </div>
+        <button>Add Tasks to your JIRA project.</button>
+    </>
     );
 };
 
