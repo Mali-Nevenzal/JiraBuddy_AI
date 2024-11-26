@@ -31,33 +31,96 @@ app.post('/ai', async (req, res) => {
 });
 
 
+// app.post('/jira', async (req, res) => {
+//   try {
+//     const data = req.body; // קבלת המידע שנשלח מהלקוח
+
+//     if (!data || !Array.isArray(data)) {
+//       return res.status(400).json({ error: "Invalid request format" });
+//     }
+
+//     // עבור על כל האובייקטים שמתקבלים
+//     for (const projectData of data) {
+//       const { Project, Assignee, Parent, Stories, Summary, Description } = projectData;
+
+//       // יצירת Epic
+//       const epicKey = await createJiraIssue(Project, 'Epic', Summary, Description, Assignee);
+
+//       // עבור על כל סיפור (Story)
+//       for (const story of Stories) {
+//         console.log("mali" +"epicKEY:"+epicKey+"")
+//         const storyKey = await createJiraIssue(story.Project, 'Story', story.Summary, story.Description, story.Assignee, story.Parent);
+
+//         // עבור על כל משימה (Task) בתוך הסיפור
+//         for (const task of story.Tasks) {
+//           const taskKey = await createJiraIssue(task.Project, 'Task', task.Summary, task.Description, task.Assignee);
+
+//           // עבור על כל Sub-task בתוך המשימה
+//           if (task['Sub-tasks']) {
+//             for (const subTask of task['Sub-tasks']) {
+//               await createJiraIssue(subTask.Project, 'Sub-task', subTask.Summary, subTask.Description, subTask.Assignee);
+//             }
+//           }
+//         }
+//       }
+//     }
+
+//     // שליחת תשובה חיובית אם כל המשימות נוספו בהצלחה
+//     res.status(200).json({ message: 'Issues created successfully!' });
+
+//   } catch (error) {
+//     console.error('Error in /jira route:', error.message);
+//     res.status(500).json({ error: "Failed to process the request" });
+//   }
+// });
 app.post('/jira', async (req, res) => {
   try {
     const data = req.body; // קבלת המידע שנשלח מהלקוח
 
-    if (!data || !Array.isArray(data)) {
+    // לוג להדפסת המידע המתקבל
+    console.log('Received data:', JSON.stringify(data, null, 2));
+
+    if (!data) {
       return res.status(400).json({ error: "Invalid request format" });
     }
 
-    // עבור על כל האובייקטים שמתקבלים
-    for (const projectData of data) {
-      const { Project, Assignee, Parent, Stories, Summary, Description } = projectData;
+    // במידה והבקשה לא היא מערך, נניח שהנתונים הם אובייקט אחד
+    const projectData = data; // או שהנתונים הם אובייקט יחיד ולא מערך
 
-      // יצירת Epic
-      const epicKey = await createJiraIssue(Project, 'Epic', Summary, Description, Assignee, Parent);
+    const { Project, Assignee, children, Summary, Description } = projectData;
 
-      // עבור על כל סיפור (Story)
-      for (const story of Stories) {
-        const storyKey = await createJiraIssue(story.Project, 'Story', story.Summary, story.Description, story.Assignee, story.Parent);
+    // אם לא קיים או לא מערך, החזר שגיאה
+    if (!Array.isArray(children)) {
+      return res.status(400).json({ error: "Children is not iterable (must be an array)" });
+    }
 
-        // עבור על כל משימה (Task) בתוך הסיפור
-        for (const task of story.Tasks) {
-          const taskKey = await createJiraIssue(task.Project, 'Task', task.Summary, task.Description, task.Assignee, task.Parent);
+    // יצירת פרויקט ראשי
+    const projectKey = await createJiraIssue(Project, 'Project', Summary, Description, Assignee);
+    console.log('Created Project with key:', projectKey);
 
-          // עבור על כל Sub-task בתוך המשימה
-          if (task['Sub-tasks']) {
-            for (const subTask of task['Sub-tasks']) {
-              await createJiraIssue(subTask.Project, 'Sub-task', subTask.Summary, subTask.Description, subTask.Assignee, subTask.Parent);
+    // עבור על כל Epic (children של פרויקט)
+    for (const epic of children) {
+      const epicKey = await createJiraIssue(epic.Project, 'Epic', epic.Summary, epic.Description, epic.Assignee);
+      console.log('Created Epic with key:', epicKey);
+
+      // עבור על כל סיפור (Story) של Epic
+      if (epic.children && Array.isArray(epic.children)) {
+        for (const story of epic.children) {
+          const storyKey = await createJiraIssue(story.Project, 'Story', story.Summary, story.Description, story.Assignee);
+          console.log('Created Story with key:', storyKey);
+
+          // עבור על כל משימה (Task) בתוך הסיפור
+          if (story.children && Array.isArray(story.children)) {
+            for (const task of story.children) {
+              const taskKey = await createJiraIssue(task.Project, 'Task', task.Summary, task.Description, task.Assignee);
+              console.log('Created Task with key:', taskKey);
+
+              // עבור על כל Sub-task בתוך המשימה
+              if (task.children && Array.isArray(task.children)) {
+                for (const subTask of task.children) {
+                  await createJiraIssue(subTask.Project, 'Sub-task', subTask.Summary, subTask.Description, subTask.Assignee);
+                }
+              }
             }
           }
         }
@@ -69,9 +132,13 @@ app.post('/jira', async (req, res) => {
 
   } catch (error) {
     console.error('Error in /jira route:', error.message);
-    res.status(500).json({ error: "Failed to process the request" });
+    res.status(500).json({ error: "Failed to process the request", details: error.message });
   }
 });
+
+
+
+
 // הפעלת השרת
 app.listen(8081, (err) => {
   if (err) {
