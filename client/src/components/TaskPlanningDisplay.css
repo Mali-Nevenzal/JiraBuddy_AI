@@ -1,8 +1,6 @@
-/* סגנונות הכלליים */
-.task-planning-container {
-    font-family: Arial, sans-serif;
-    margin: 20px;
-    padding: 10px;
+/* .task-planning-container {
+    font-family: Verdana, sans-serif;
+    margin: 10px;
   }
   
   .node {
@@ -13,9 +11,9 @@
     border-radius: 5px;
     border: 1px solid #ddd;
     position: relative;
+    font-size: 13px;
   }
   
-  /* צביעת סוגי הבעיה */
   .node-content {
     padding: 10px;
     border-radius: 4px;
@@ -26,23 +24,21 @@
   }
   
   .node-content.story {
-    background-color: #a1e6f9;
+    background-color: #61d570;
   }
   
   .node-content.task {
-    background-color: #e6f9a1;
+    background-color: #58bfdb;
   }
   
   .node-content.subtask {
     background-color: #f9a1a1;
   }
   
-  /* ילדים */
   .children {
     margin-left: 20px;
   }
   
-  /* חיצים או קווים בין האב לילדים */
   .node:after {
     content: "";
     position: absolute;
@@ -54,26 +50,114 @@
     transform: translateY(-50%);
   }
   
-  /* רמות שונות */
   .level-0 {
     font-weight: bold;
-    border: 2px solid #333;
+    border: 2px solid #f14500;
   }
   
   .level-1 {
-    border-left: 3px solid #f0ad4e;
+    border-left: 3px solid #c09ee7;
   }
   
   .level-2 {
-    border-left: 3px solid #5bc0de;
+    border-left: 3px solid #61d570;
   }
   
   .level-3 {
-    border-left: 3px solid #5cb85c;
+    border-left: 3px solid #58bfdb;
   }
   
   .level-4 {
     border-left: 3px solid #d9534f;
   }
   
-  
+   */
+
+   .task-planning-container {
+    font-family: Verdana, sans-serif;
+}
+
+.node {
+    display: inline-block;
+    padding: 10px;
+    background-color: #f4f4f4;
+    border-radius: 5px;
+    position: relative;
+    font-size: 13px;
+    text-align: center; 
+    width: auto; 
+    box-shadow: none; 
+}
+
+.node-content {
+    padding: 10px;
+    border-radius: 4px;
+    display: inline-block;
+    background-color: #ddd;
+}
+
+/* הצגת EPIC */
+.node-content.epic {
+    background-color: #c09ee7;
+}
+
+/* הצגת STORY */
+.node-content.story {
+    background-color: #61d570;
+}
+
+/* הצגת TASK */
+.node-content.task {
+    background-color: #58bfdb;
+}
+
+/* הצגת SUBTASK */
+.node-content.subtask {
+    background-color: #f9a1a1;
+}
+
+/* הצגת ילדים (בנים) */
+.tree-level {
+    display: flex;
+    justify-content: center; /* כל הילדים נמצאים בשורה אחת */
+    /* margin-top: 20px; */
+}
+
+/* צבעים לכל רמה */
+.level-0 {
+    font-weight: bold;
+    background-color: #f9f9f9;
+}
+
+.level-1 {
+    background-color: #e1daf1;
+}
+
+.level-2 {
+    background-color: #c8e6a9;
+}
+
+.level-3 {
+    background-color: #b1e0f4;
+}
+
+.level-4 {
+    background-color: #f8d0d1;
+}
+
+/* סגנון לחיצה על הכפתור */
+button {
+    /* margin-top: 20px; */
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #45a049;
+}
