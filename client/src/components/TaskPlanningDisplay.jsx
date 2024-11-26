@@ -90,6 +90,7 @@ import JiraIntegration from "./JiraIntegration";
 
 const TaskPlanningDisplay = ({ taskPlanning }) => {
 
+    const[sendToJira,setSendToJira] = (false);
     const renderTaskPlanning = (result) => {
         const platePlan = result.PlatePlan && Array.isArray(result.PlatePlan) ? result.PlatePlan : [];
 
@@ -164,8 +165,8 @@ const TaskPlanningDisplay = ({ taskPlanning }) => {
         <div className="task-planning-container">
             {renderTaskPlanning(taskPlanning).map((rootNode) => renderTree([rootNode], 0))}
         </div>
-        <button>Add Tasks to your JIRA project.</button>
-        {<JiraIntegration taskPlanning={taskPlanning} />}
+        <button onClick={() => setSendToJira(true)}>Add Tasks to your JIRA project.</button>
+        {sendToJira && <JiraIntegration taskPlanning={taskPlanning} />}
     </>
     );
 };
