@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { Box, TextField, Button, Typography, MenuItem, Select, InputLabel, FormControl } from "@mui/material";
+import TaskPlanningDisplay from "./TaskPlanningDisplay";
 
 const ProjectForm = () => {
   const [formData, setFormData] = useState({
     projectName: "",
-    taskOwner: "",
-    taskType: "",
+    assignee: "",
+    type: "",
     taskDescription: "",
   });
+
+  const [error, setError] = useState(false);
+  const [taskPlanning, setTaskPlanning] = useState("");
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -15,11 +19,45 @@ const ProjectForm = () => {
       ...formData,
       [name]: value,
     });
+    setError(false);
   };
 
-  const handleSubmit = () => {
-    console.log("Form Data:", formData);
-    // ניתן להוסיף כאן לוגיקה לשליחת הנתונים לשרת
+  const handleSubmit = async () => {
+    const { projectName, assignee, type, taskDescription } = formData;
+    if (!projectName || !assignee || !type || !taskDescription) {
+      setError(true);
+      return;
+    }
+
+    try {
+      const result = await sendFormData(); 
+      console.log("Form submitted successfully:", result);
+    } catch (error) {
+      console.error("Failed to submit form:", error);
+    }
+  };
+
+  const sendFormData = async () => {
+    try {
+      const response = await fetch("http://localhost:8081/ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to submit form");
+      }
+  
+      const result = await response.json();
+      setTaskPlanning(result);
+      console.log("Response:", result);
+    } catch (error) {
+      console.error("Error:", error);
+      throw error;
+    }
   };
 
   return (
@@ -55,26 +93,28 @@ const ProjectForm = () => {
           fullWidth
           value={formData.projectName}
           onChange={handleChange}
+          required
           sx={{ marginBottom: 3 }}
         />
 
         {/* Task Owner */}
         <TextField
           label="Task Owner"
-          name="taskOwner"
+          name="assignee"
           variant="outlined"
           fullWidth
-          value={formData.taskOwner}
+          value={formData.assignee}
           onChange={handleChange}
+          required
           sx={{ marginBottom: 3 }}
         />
 
         {/* Task Type Selector */}
-        <FormControl fullWidth sx={{ marginBottom: 3 }}>
+        <FormControl fullWidth sx={{ marginBottom: 3 }} required>
           <InputLabel>Task Type</InputLabel>
           <Select
-            name="taskType"
-            value={formData.taskType}
+            name="type"
+            value={formData.type}
             onChange={handleChange}
             label="Task Type"
           >
@@ -95,8 +135,16 @@ const ProjectForm = () => {
           fullWidth
           value={formData.taskDescription}
           onChange={handleChange}
+          required
           sx={{ marginBottom: 3 }}
         />
+
+        {/* Error Message */}
+        {error && (
+          <Typography color="error" sx={{ marginBottom: 2 }}>
+            Please fill out all fields.
+          </Typography>
+        )}
 
         {/* Submit Button */}
         <Button
@@ -108,6 +156,7 @@ const ProjectForm = () => {
           Submit
         </Button>
       </Box>
+      {taskPlanning!="" && <TaskPlanningDisplay taskPlanning={taskPlanning}/>}
     </Box>
   );
 };

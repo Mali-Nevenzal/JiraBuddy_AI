@@ -1,26 +1,28 @@
 import express from 'express';
 import cors from 'cors';
-import { generateQuiz } from './generateQuiz.js';
+import { generateQuiz } from './AIIntegration.js';
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
 // מסלול לטיפול בבקשות ל-Gemini
-app.post('/gemini', async (req, res) => {
+app.post('/ai', async (req, res) => {
+  console.log("aaa");
   try {
     // חילוץ השדות מהבקשה
-    const { projectOrTaskDescription, type, assignee, projectName } = req.body;
+    const { projectName, assignee, type, taskDescription } = req.body;
 
     // בדיקת תקינות השדות
-    if (!projectOrTaskDescription || !type || !assignee || !projectName) {
-      return res.status(400).json({ error: "Missing required fields: projectOrTaskDescription, type, assignee, projectName" });
+    if (!taskDescription || !type || !assignee || !projectName) {
+      return res.status(400).json({ error: "Missing required fields: taskDescription, type, assignee, projectName" });
     }
 
     // קריאה לפונקציה generateQuiz עם הפרמטרים
-    const quizResult = await generateQuiz(projectOrTaskDescription, type, assignee, projectName);
+    const quizResult = await generateQuiz(taskDescription, type, assignee, projectName);
 
     // שליחת התוצאה בחזרה ללקוח
+    console.log(quizResult);
     res.status(200).json(quizResult);
   } catch (error) {
     console.error('Error in /gemini route:', error.message);
@@ -29,10 +31,10 @@ app.post('/gemini', async (req, res) => {
 });
 
 // הפעלת השרת
-app.listen(8080, (err) => {
+app.listen(8081, (err) => {
   if (err) {
     console.error("Error starting server:", err);
   } else {
-    console.log("Server listening on PORT 8080");
+    console.log("Server listening on PORT 8081");
   }
 });
