@@ -1,11 +1,10 @@
-import { useState } from 'react'
-import InputForm from './components/InputForm'
+import Home from './components/Home'
 
 function App() {
   
   return (
     <>
-     <InputForm/>
+     <Home/>
     </>
   )
 }

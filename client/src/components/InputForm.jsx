@@ -12,6 +12,7 @@ const ProjectForm = () => {
 
   const [error, setError] = useState(false);
   const [taskPlanning, setTaskPlanning] = useState("");
+  const [loading, setLoading] = useState(false); // מצב של טעינה
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -29,11 +30,15 @@ const ProjectForm = () => {
       return;
     }
 
+    setLoading(true); 
+
     try {
       const result = await sendFormData(); 
       console.log("Form submitted successfully:", result);
     } catch (error) {
       console.error("Failed to submit form:", error);
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -46,11 +51,11 @@ const ProjectForm = () => {
         },
         body: JSON.stringify(formData),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to submit form");
       }
-  
+
       const result = await response.json();
       setTaskPlanning(result);
       console.log("Response:", result);
@@ -61,18 +66,8 @@ const ProjectForm = () => {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        padding: 4,
-        backgroundColor: "#f5f5f5",
-      }}
-    >
-      <Box
+    <>
+      {taskPlanning == "" && !loading && <Box
         sx={{
           backgroundColor: "white",
           padding: 4,
@@ -82,7 +77,7 @@ const ProjectForm = () => {
         }}
       >
         <Typography variant="h4" gutterBottom align="center">
-          Project Task Form
+        Fill in your project details
         </Typography>
 
         {/* Project Name */}
@@ -94,7 +89,7 @@ const ProjectForm = () => {
           value={formData.projectName}
           onChange={handleChange}
           required
-          sx={{ marginBottom: 3 }}
+          sx={{ marginBottom: 2 }}
         />
 
         {/* Task Owner */}
@@ -106,7 +101,7 @@ const ProjectForm = () => {
           value={formData.assignee}
           onChange={handleChange}
           required
-          sx={{ marginBottom: 3 }}
+          sx={{ marginBottom: 2 }}
         />
 
         {/* Task Type Selector */}
@@ -130,13 +125,13 @@ const ProjectForm = () => {
           label="Task Description"
           name="taskDescription"
           multiline
-          rows={6}
+          rows={5}
           variant="outlined"
           fullWidth
           value={formData.taskDescription}
           onChange={handleChange}
           required
-          sx={{ marginBottom: 3 }}
+          sx={{ marginBottom: 2 }}
         />
 
         {/* Error Message */}
@@ -153,11 +148,20 @@ const ProjectForm = () => {
           fullWidth
           onClick={handleSubmit}
         >
-          Submit
+          Split into Tasks
         </Button>
-      </Box>
-      {taskPlanning!="" && <TaskPlanningDisplay taskPlanning={taskPlanning}/>}
-    </Box>
+      </Box>}
+
+      {/* Loading message */}
+      {loading && (
+        <Typography variant="h6" color="primary" sx={{ marginTop: 2 }}>
+          Loading...
+        </Typography>
+      )}
+
+      {/* Display Task Planning if data exists */}
+      {taskPlanning !== "" && !loading && <TaskPlanningDisplay taskPlanning={taskPlanning} />}
+    </>
   );
 };
 
