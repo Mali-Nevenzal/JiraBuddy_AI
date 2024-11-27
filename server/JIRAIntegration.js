@@ -7,7 +7,7 @@ export async function createJiraIssue(projectKey, issueType, summary, Descriptio
     try {
         const url = `${process.env.JIRA_BASE_URL}/rest/api/3/issue`;
 
-        const ADFDescription = {
+        const description = {
             "version": 1,
             "type": "doc",
             "content": [
