@@ -8,7 +8,6 @@ app.use(express.json());
 
 // מסלול לטיפול בבקשות ל-Gemini
 app.post('/ai', async (req, res) => {
-  console.log("aaa");
   try {
     // חילוץ השדות מהבקשה
     const { projectName, assignee, type, taskDescription } = req.body;
@@ -22,11 +21,76 @@ app.post('/ai', async (req, res) => {
     const quizResult = await generateQuiz(taskDescription, type, assignee, projectName);
 
     // שליחת התוצאה בחזרה ללקוח
-    console.log(quizResult);
+    //console.log(quizResult);
     res.status(200).json(quizResult);
   } catch (error) {
     console.error('Error in /gemini route:', error.message);
     res.status(500).json({ error: "Failed to process the request" });
+  }
+});
+
+
+app.post('/jira', async (req, res) => {
+  try {
+    const data = req.body; // קבלת המידע שנשלח מהלקוח
+
+    // לוג להדפסת המידע המתקבל
+    //console.log('Received data:', JSON.stringify(data, null, 2));
+
+    if (!data) {
+      return res.status(400).json({ error: "Invalid request format" });
+    }
+
+    const projectData = data; // או שהנתונים הם אובייקט יחיד ולא מערך
+    const { Project, Assignee, children, Summary, Description } = projectData;
+    console.log("MMMMMMMMMMMMMMMMMMMMMM"+"Project: "+Project+"Assignee: "+Assignee+"children: "+children+"Summary: "+Summary+"Description: "+Description)
+    // אם לא קיים או לא מערך, החזר שגיאה
+    if (!Array.isArray(children)) {
+      return res.status(400).json({ error: "Children is not iterable (must be an array)" });
+    }
+
+    // יצירת פרויקט ראשי
+    const projectKey = await createJiraIssue(Project, 'Project', Summary, Description, Assignee);
+    //console.log('Created Project with key:', projectKey);
+
+    // שמירת כל המפתחות של המשימות שנוצרו כדי למנוע יצירה כפולה
+    const createdIssues = new Set([projectKey]); // Include project key to avoid duplications
+
+    // יצירת EPICs, STORIES ו-TASKS תחת ה-Project
+    for (const epic of children) {
+      const epicKey = await createJiraIssue(epic.Project, 'Epic', epic.Summary, epic.Description, epic.Assignee);
+      //console.log('Created Epic with key:', epicKey);
+      createdIssues.add(epicKey); // Add EPIC key to createdIssues
+
+      if (epic.children && Array.isArray(epic.children)) {
+        // עבור כל STORY ו-TASK תחת ה-EPIC
+        for (const issue of epic.children) {
+          const issueType = issue['Issue type'] === 'Story' ? 'Story' : 'Task';
+          if (!createdIssues.has(issue.Summary)) { // אם המשימה לא נוצרה עדיין
+            const issueKey = await createJiraIssue(issue.Project, issueType, issue.Summary, issue.Description, issue.Assignee, epicKey);
+            //console.log(`${issueType} created with key:`, issueKey);
+            createdIssues.add(issue.Summary); // להוסיף את סיכום המשימה כדי למנוע כפילות
+          }
+        }
+      }
+    }
+
+    // עבור על כל המשימות שלא תחת EPIC
+    for (const issue of children) {
+      const issueType = issue['Issue type'] === 'Story' ? 'Story' : 'Task';
+      if (!createdIssues.has(issue.Summary)) { // אם המשימה לא נוצרה עדיין
+        const issueKey = await createJiraIssue(issue.Project, issueType, issue.Summary, issue.Description, issue.Assignee);
+        //console.log(`${issueType} created with key:`, issueKey);
+        createdIssues.add(issue.Summary); // להוסיף את סיכום המשימה כדי למנוע כפילות
+      }
+    }
+
+    // שליחת תשובה חיובית אם כל המשימות נוספו בהצלחה
+    res.status(200).json({ message: 'Issues created successfully!' });
+
+  } catch (error) {
+    //console.error('Error in /jira route:', error.message);
+    res.status(500).json({ error: "Failed to process the request", details: error.message });
   }
 });
 
@@ -73,71 +137,6 @@ app.post('/ai', async (req, res) => {
 //     res.status(500).json({ error: "Failed to process the request" });
 //   }
 // });
-app.post('/jira', async (req, res) => {
-  try {
-    const data = req.body; // קבלת המידע שנשלח מהלקוח
-
-    // לוג להדפסת המידע המתקבל
-    console.log('Received data:', JSON.stringify(data, null, 2));
-
-    if (!data) {
-      return res.status(400).json({ error: "Invalid request format" });
-    }
-
-    const projectData = data; // או שהנתונים הם אובייקט יחיד ולא מערך
-    const { Project, Assignee, children, Summary, Description } = projectData;
-
-    // אם לא קיים או לא מערך, החזר שגיאה
-    if (!Array.isArray(children)) {
-      return res.status(400).json({ error: "Children is not iterable (must be an array)" });
-    }
-
-    // יצירת פרויקט ראשי
-    const projectKey = await createJiraIssue(Project, 'Project', Summary, Description, Assignee);
-    console.log('Created Project with key:', projectKey);
-
-    // שמירת כל המפתחות של המשימות שנוצרו כדי למנוע יצירה כפולה
-    const createdIssues = new Set([projectKey]); // Include project key to avoid duplications
-
-    // יצירת EPICs, STORIES ו-TASKS תחת ה-Project
-    for (const epic of children) {
-      const epicKey = await createJiraIssue(epic.Project, 'Epic', epic.Summary, epic.Description, epic.Assignee);
-      console.log('Created Epic with key:', epicKey);
-      createdIssues.add(epicKey); // Add EPIC key to createdIssues
-
-      if (epic.children && Array.isArray(epic.children)) {
-        // עבור כל STORY ו-TASK תחת ה-EPIC
-        for (const issue of epic.children) {
-          const issueType = issue['Issue type'] === 'Story' ? 'Story' : 'Task';
-          if (!createdIssues.has(issue.Summary)) { // אם המשימה לא נוצרה עדיין
-            const issueKey = await createJiraIssue(issue.Project, issueType, issue.Summary, issue.Description, issue.Assignee, epicKey);
-            console.log(`${issueType} created with key:`, issueKey);
-            createdIssues.add(issue.Summary); // להוסיף את סיכום המשימה כדי למנוע כפילות
-          }
-        }
-      }
-    }
-
-    // עבור על כל המשימות שלא תחת EPIC
-    for (const issue of children) {
-      const issueType = issue['Issue type'] === 'Story' ? 'Story' : 'Task';
-      if (!createdIssues.has(issue.Summary)) { // אם המשימה לא נוצרה עדיין
-        const issueKey = await createJiraIssue(issue.Project, issueType, issue.Summary, issue.Description, issue.Assignee);
-        console.log(`${issueType} created with key:`, issueKey);
-        createdIssues.add(issue.Summary); // להוסיף את סיכום המשימה כדי למנוע כפילות
-      }
-    }
-
-    // שליחת תשובה חיובית אם כל המשימות נוספו בהצלחה
-    res.status(200).json({ message: 'Issues created successfully!' });
-
-  } catch (error) {
-    console.error('Error in /jira route:', error.message);
-    res.status(500).json({ error: "Failed to process the request", details: error.message });
-  }
-});
-
-
 
 
 // הפעלת השרת
