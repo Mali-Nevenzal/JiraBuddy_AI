@@ -1,23 +1,25 @@
 .task-planning-container {
     font-family: Verdana, sans-serif;
-    margin: 40px;
+    margin: 0 13%;
 }
 
 .node {
     display: inline-block;
-    padding: 20px 10px;
+    padding: 20px 10px 8px 10px;
     background-color: #f4f4f4;
     position: relative;
-    font-size: 13px;
+    font-size: 15px;
     text-align: center;
     width: auto;
     box-shadow: none;
 }
 
+
+
 .node-content {
-    padding: 10px;
+    padding: 20px;
     border-radius: 4px;
-    background-color: #ddd;
+    background-color: #f68438;
 }
 
 .node-content.epic {
@@ -75,4 +77,10 @@ button {
 
 button:hover {
     background-color: #45a049;
+}
+
+.task-icon {
+    position: absolute; 
+    left: 15px; 
+    width: 25px; 
 }

@@ -30,7 +30,7 @@
 }
 
 button {
-    margin-top: 80px;
+    margin-top: 30px;
     padding: 10px 20px;
     font-size: 1em;
     background-color: #4CAF50;
@@ -46,7 +46,7 @@ button:hover {
 }
 
 body {
-    margin-top: 150px;
+    margin-top: 90px;
     display: flex;
     flex-direction: column;
     align-items: center;
