@@ -19,7 +19,7 @@
     text-align: center;
     position: relative;
     min-width: 150px;
-    width: 100%; /* תופס את כל הרוחב של הורה */
+    width: 100%;
 }
 
 .node-content.epic {
@@ -36,17 +36,17 @@
 
 .tree-level {
     display: flex;
-    justify-content: space-between; /* מפזר שווה ברוחב */
+    justify-content: space-between; 
     margin-top: 20px;
     position: relative;
-    flex-wrap: wrap; /* אפשר חפיפות ורוחב דינמי */
+    flex-wrap: wrap; 
 }
 
 .tree-level li {
     position: relative;
     list-style: none;
-    flex: 1; /* כל ילד יתפוס חלק שווה במרחב */
-    min-width: 150px; /* מינימום רוחב */
+    flex: 1; 
+    min-width: 150px;
 }
 
 .tree-level li::before {
