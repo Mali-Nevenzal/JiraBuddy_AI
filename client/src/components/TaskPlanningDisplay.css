@@ -1,6 +1,6 @@
 .task-planning-container {
     font-family: Verdana, sans-serif;
-    margin: 30px 3%;
+    margin: 10px 3%;
     font-size: 14px;
 }
 
@@ -19,7 +19,8 @@
     text-align: center;
     position: relative;
     min-width: 150px;
-    width: 100%; /* תופס את כל הרוחב של הורה */
+    width: 100%;
+    /* box-sizing: border-box; */
 }
 
 .node-content.epic {
@@ -36,17 +37,18 @@
 
 .tree-level {
     display: flex;
-    justify-content: space-between; /* מפזר שווה ברוחב */
+    justify-content: space-between; 
     margin-top: 20px;
     position: relative;
-    flex-wrap: wrap; /* אפשר חפיפות ורוחב דינמי */
+    flex-wrap: wrap; 
+    padding-left: 0px;
 }
 
 .tree-level li {
     position: relative;
     list-style: none;
-    flex: 1; /* כל ילד יתפוס חלק שווה במרחב */
-    min-width: 150px; /* מינימום רוחב */
+    flex: 1; 
+    min-width: 150px;
 }
 
 .tree-level li::before {
@@ -102,4 +104,8 @@ button:hover {
     position: absolute;
     left: 15px;
     width: 25px;
+}
+
+.button-Add-to-Jira{
+    margin-top: 80px;
 }
