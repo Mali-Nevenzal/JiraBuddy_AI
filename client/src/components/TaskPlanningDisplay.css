@@ -1,6 +1,6 @@
 .task-planning-container {
     font-family: Verdana, sans-serif;
-    margin: 10px 3%;
+    margin: 0px 3%;
     font-size: 14px;
 }
 
@@ -20,7 +20,14 @@
     position: relative;
     min-width: 150px;
     width: 100%;
-    /* box-sizing: border-box; */
+}
+
+.node-content img {
+    position: absolute;
+    top: 3px; 
+    left: 3px; 
+    max-width: 30px; 
+    max-height: 30px; 
 }
 
 .node-content.epic {
@@ -101,11 +108,12 @@ button:hover {
 }
 
 .task-icon {
-    position: absolute;
-    left: 15px;
     width: 25px;
+    height: 25px; 
+    margin-right: 10px; 
 }
 
+
 .button-Add-to-Jira{
-    margin-top: 80px;
+    margin-top: 40px;
 }

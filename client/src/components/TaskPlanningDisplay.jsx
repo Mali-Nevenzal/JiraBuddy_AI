@@ -44,6 +44,7 @@ const TaskPlanningDisplay = ({ taskPlanning }) => {
         <>
             <button className="button-Add-to-Jira"onClick={() => setSendToJira(true)}>Add Tasks to your JIRA project.</button>
             {sendToJira && <JiraIntegration taskPlanning={taskPlanning} />}
+            <h2>Tasks Division:</h2>
             <div className="task-planning-container">
                 {renderTree(taskPlanning)}
             </div>
