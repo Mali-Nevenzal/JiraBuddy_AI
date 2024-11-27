@@ -55,7 +55,6 @@ const ProjectForm = () => {
             if (!response.ok) {
                 throw new Error("Failed to submit form");
             }
-
             const result = await response.json();
             setTaskPlanning(result);
             console.log("Response:", result);

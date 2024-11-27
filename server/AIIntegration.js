@@ -6,7 +6,7 @@ dotenv.config();
 export const generateQuiz = async (taskDescription, type, assignee, projectName) => {
   const genAI = new GoogleGenerativeAI(process.env.API_KEY);
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-  
+
 const prompt = `
 The user wants to plan a project/task for a system like JIRA. The response must return a hierarchical breakdown of tasks and subtasks in **valid JSON format** that matches the specified structure and rules below.
 
@@ -89,7 +89,6 @@ Please generate a **valid JSON** object that follows these rules for the input p
 - Assignee: \`${assignee}\`
 `;
 
-
   try {
     const result = await model.generateContent(prompt);
     let generatedText = result.response.text();
@@ -106,7 +105,6 @@ Please generate a **valid JSON** object that follows these rules for the input p
       throw new Error('Invalid JSON format received from AI');
     }
 
-    console.log(quizData);
     return quizData;
   } catch (error) {
     console.error('Error generating quiz:', error);

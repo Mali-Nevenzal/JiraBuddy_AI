@@ -3,6 +3,8 @@ import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
 
 const JiraIntegration = ({ taskPlanning }) => {
+
+  const [sendToJira, setSendToJira] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [open, setOpen] = useState(false); // State for Snackbar
@@ -12,7 +14,6 @@ const JiraIntegration = ({ taskPlanning }) => {
   const sendFormData = async () => {
     setLoading(true);
     setError(null);
-
     try {
       const response = await fetch("http://localhost:8081/jira", {
         method: "POST",
@@ -52,10 +53,10 @@ const JiraIntegration = ({ taskPlanning }) => {
   };
 
   useEffect(() => {
-    if (taskPlanning !== "") {
+    if (sendToJira) {
       sendFormData();
     }
-  }, [taskPlanning]);
+  }, [sendToJira]);
 
   const handleClose = (event, reason) => {
     if (reason === "clickaway") {
@@ -66,6 +67,7 @@ const JiraIntegration = ({ taskPlanning }) => {
 
   return (
     <>
+      <button className="button-Add-to-Jira" onClick={() => setSendToJira(true)}>Add Tasks to your JIRA project.</button>
       {loading && (
         <div>
           <h3>Loading...</h3>
@@ -97,4 +99,3 @@ const JiraIntegration = ({ taskPlanning }) => {
 };
 
 export default JiraIntegration;
-

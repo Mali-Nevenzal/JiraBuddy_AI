@@ -1,9 +1,7 @@
 import "./TaskPlanningDisplay.css";
 import JiraIntegration from "./JiraIntegration";
-import { useState } from "react";
 
 const TaskPlanningDisplay = ({ taskPlanning }) => {
-    const [sendToJira, setSendToJira] = useState(false);
 
     const renderTree = (task) => {
         if (!task) return null;
@@ -42,8 +40,7 @@ const TaskPlanningDisplay = ({ taskPlanning }) => {
 
     return (
         <>
-            <button className="button-Add-to-Jira"onClick={() => setSendToJira(true)}>Add Tasks to your JIRA project.</button>
-            {sendToJira && <JiraIntegration taskPlanning={taskPlanning} />}
+            <JiraIntegration taskPlanning={taskPlanning} />
             <h2>Tasks Division:</h2>
             <div className="task-planning-container">
                 {renderTree(taskPlanning)}
