@@ -6,49 +6,89 @@ dotenv.config();
 export const generateQuiz = async (taskDescription, type, assignee, projectName) => {
   const genAI = new GoogleGenerativeAI(process.env.API_KEY);
   const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
+  
 const prompt = `
-The user wants to plan a project/task. The goal is to return a hierarchical breakdown of tasks and subtasks that would be suitable for a project management system like JIRA. The AI should return its response in **valid JSON format**.
+The user wants to plan a project/task for a system like JIRA. The response must return a hierarchical breakdown of tasks and subtasks in **valid JSON format** that matches the specified structure and rules below.
 
-The user will input a description of the task or project ${taskDescription}, the type ${type}, the assignee ${assignee}, and the project name ${projectName}. Based on the ${type}, which indicates the level of granularity (e.g., Project, Epic, Story, Task), the AI should break it down into Epics, Stories, Tasks, and Sub-tasks with detailed descriptions for each task.
+### Structure Rules:
+1. A **Project** contains **EPICs**, **TASKS**, and/or **STORIES**:
+   - **EPIC**: A large task that can be split into smaller tasks (children).  
+   - **TASK**: A specific and focused task related to functionality or requirements.  
+   - **STORY**: A technical or general task needed for the project.  
 
-If the ${type} is 'Project', return the full breakdown of tasks and subtasks for the project (Epics, Stories, Tasks, Sub-tasks). If the ${type} is any other value (Epic, Story, Task), return the breakdown for that specific level.
+2. **EPIC** tasks may contain **TASKS** and/or **STORIES** as direct children.  
+3. **TASKS** and **STORIES** cannot contain children.  
 
-For each task, story, sub-task, etc., the AI should return the following details in **valid JSON format**:
+4. **TASKS** and **STORIES** can belong to the **Project** directly (i.e., without being part of an EPIC).  
 
+5. Every task must include these fields:
+   - "Project": Name of the project.
+   - "Issue type": Either "Project", "Epic", "Task", or "Story".
+   - "Summary": A brief title for the task.
+   - "Description": A description of the task.
+   - "Assignee": The person assigned to the task (or null if unassigned).
+   - "Parent": The parent issue (or null for top-level tasks).
+   - "children": An array of child tasks (empty for leaf tasks).
+
+### Input Details:
+- The user will provide:
+  - Project Name: \`${projectName}\`
+  - Project/Task Description: \`${taskDescription}\`
+  - Type: \`${type}\` (e.g., Project, Epic, Task, Story)
+  - Assignee: \`${assignee}\`
+
+- If the type is "Project", provide the full hierarchy of EPICs, TASKS, and STORIES.  
+- If the type is "Epic", "Task", or "Story", provide the breakdown for that level only.
+
+- Example Output:
+\`\`\`json
 {
-  "Project": "${projectName}",
-  "Issue type": "Epic / Story / Task / Sub-task",
-  "Summary": "Summary of the task",
-  "Description": "Description of the task",
-  "Assignee": "${assignee}",
-  "Parent": "Parent issue ID or null",
+  "Project": "Example Project",
+  "Issue type": "Project",
+  "Summary": "Example Summary",
+  "Description": "Example Description",
+  "Assignee": null,
+  "Parent": null,
   "children": [
     {
-      "Project": "Project name of the child",
-      "Issue type": "Epic / Story / Task / Sub-task",
-      "Summary": "Summary of the child task",
-      "Description": "Description of the child task",
-      "Assignee": "Assignee of the child task",
-      "Parent": "Parent issue ID of the child (use null if no parent)",
-      "children": [...]
+      "Project": "Example Project",
+      "Issue type": "Epic",
+      "Summary": "Epic Summary",
+      "Description": "Epic Description",
+      "Assignee": "Example Assignee",
+      "Parent": null,
+      "children": [
+        {
+          "Project": "Example Project",
+          "Issue type": "Task",
+          "Summary": "Task Summary",
+          "Description": "Task Description",
+          "Assignee": "Example Assignee",
+          "Parent": "Epic ID",
+          "children": []
+        },
+        {
+          "Project": "Example Project",
+          "Issue type": "Story",
+          "Summary": "Story Summary",
+          "Description": "Story Description",
+          "Assignee": "Example Assignee",
+          "Parent": "Epic ID",
+          "children": []
+        }
+      ]
     }
   ]
 }
+\`\`\`
 
-- If there are no sub-tasks or child issues, the "children" field should be an empty array: "children": [].
-- Ensure that the JSON format is strictly followed with proper keys and values.
-- Each task can have nested tasks, so ensure that the hierarchy is preserved from Project -> Epic -> Story -> Task -> Sub-task.
-- Ensure that the Project, Issue type, Summary, Description, Assignee, and Parent fields are always included.
-
-Please respond with the breakdown of the project in a **valid, parsable JSON format** that matches the JIRA structure, making sure to include all relevant details for each task level, even if some fields are missing for specific tasks (in that case, use null for missing fields).
-
-Here is the task/project you need to break down:
-Project Name: ${projectName}
-Project/Task Description: ${taskDescription}
-Type: ${type}
-Assignee: ${assignee}
+Please generate a **valid JSON** object that follows these rules for the input provided:
+- Project Name: \`${projectName}\`
+- Project Description: \`${taskDescription}\`
+- Type: \`${type}\`
+- Assignee: \`${assignee}\`
 `;
+
 
   try {
     const result = await model.generateContent(prompt);
