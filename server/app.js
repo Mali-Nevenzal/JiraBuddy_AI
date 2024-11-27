@@ -84,9 +84,7 @@ app.post('/jira', async (req, res) => {
       return res.status(400).json({ error: "Invalid request format" });
     }
 
-    // במידה והבקשה לא היא מערך, נניח שהנתונים הם אובייקט אחד
     const projectData = data; // או שהנתונים הם אובייקט יחיד ולא מערך
-
     const { Project, Assignee, children, Summary, Description } = projectData;
 
     // אם לא קיים או לא מערך, החזר שגיאה
@@ -98,32 +96,35 @@ app.post('/jira', async (req, res) => {
     const projectKey = await createJiraIssue(Project, 'Project', Summary, Description, Assignee);
     console.log('Created Project with key:', projectKey);
 
-    // עבור על כל Epic (children של פרויקט)
+    // שמירת כל המפתחות של המשימות שנוצרו כדי למנוע יצירה כפולה
+    const createdIssues = new Set([projectKey]); // Include project key to avoid duplications
+
+    // יצירת EPICs, STORIES ו-TASKS תחת ה-Project
     for (const epic of children) {
       const epicKey = await createJiraIssue(epic.Project, 'Epic', epic.Summary, epic.Description, epic.Assignee);
       console.log('Created Epic with key:', epicKey);
+      createdIssues.add(epicKey); // Add EPIC key to createdIssues
 
-      // עבור על כל סיפור (Story) של Epic
       if (epic.children && Array.isArray(epic.children)) {
-        for (const story of epic.children) {
-          const storyKey = await createJiraIssue(story.Project, 'Story', story.Summary, story.Description, story.Assignee);
-          console.log('Created Story with key:', storyKey);
-
-          // עבור על כל משימה (Task) בתוך הסיפור
-          if (story.children && Array.isArray(story.children)) {
-            for (const task of story.children) {
-              const taskKey = await createJiraIssue(task.Project, 'Task', task.Summary, task.Description, task.Assignee);
-              console.log('Created Task with key:', taskKey);
-
-              // עבור על כל Sub-task בתוך המשימה
-              if (task.children && Array.isArray(task.children)) {
-                for (const subTask of task.children) {
-                  await createJiraIssue(subTask.Project, 'Sub-task', subTask.Summary, subTask.Description, subTask.Assignee);
-                }
-              }
-            }
+        // עבור כל STORY ו-TASK תחת ה-EPIC
+        for (const issue of epic.children) {
+          const issueType = issue['Issue type'] === 'Story' ? 'Story' : 'Task';
+          if (!createdIssues.has(issue.Summary)) { // אם המשימה לא נוצרה עדיין
+            const issueKey = await createJiraIssue(issue.Project, issueType, issue.Summary, issue.Description, issue.Assignee, epicKey);
+            console.log(`${issueType} created with key:`, issueKey);
+            createdIssues.add(issue.Summary); // להוסיף את סיכום המשימה כדי למנוע כפילות
           }
         }
+      }
+    }
+
+    // עבור על כל המשימות שלא תחת EPIC
+    for (const issue of children) {
+      const issueType = issue['Issue type'] === 'Story' ? 'Story' : 'Task';
+      if (!createdIssues.has(issue.Summary)) { // אם המשימה לא נוצרה עדיין
+        const issueKey = await createJiraIssue(issue.Project, issueType, issue.Summary, issue.Description, issue.Assignee);
+        console.log(`${issueType} created with key:`, issueKey);
+        createdIssues.add(issue.Summary); // להוסיף את סיכום המשימה כדי למנוע כפילות
       }
     }
 
