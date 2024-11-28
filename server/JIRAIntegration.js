@@ -1,9 +1,8 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-
-// פונקציה ליצירת משימה חדשה ב-JIRA
-export async function createJiraIssue(projectKey, issueType, summary, Description,assignee) {
+// Function to create a new issue in JIRA
+export async function createJiraIssue(projectKey, issueType, summary, Description, assignee) {
     try {
         const url = `${process.env.JIRA_BASE_URL}/rest/api/3/issue`;
 
@@ -23,32 +22,27 @@ export async function createJiraIssue(projectKey, issueType, summary, Descriptio
             ]
         };
 
-        // יצירת הפלט (Payload) שנשלח ל-JIRA
+        // Construct the payload to be sent to JIRA
         const payload = {
             fields: {
                 project: {
-                    key: projectKey, // מפתח הפרויקט
+                    key: projectKey, // Project key
                 },
-                summary: summary, // סיכום המשימה
-                description: description, // תיאור המשימה - טקסט פשוט
+                summary: summary, // Task summary
+                description: description, // Task description in plain text
                 issuetype: {
-                    name: issueType, // סוג המשימה (Epic, Story, Task, Sub-task)
+                    name: issueType, // Issue type (Epic, Story, Task, Sub-task)
                 },
                 assignee: {
-                    name: assignee, // המוקצה למשימה
+                    name: assignee, // Assignee for the task
                 },
             },
         };
 
-        // אם יש Parent (הורה) למשל אם מדובר ב-Sub-task או Task
-        // if (parentKey) {
-        //     payload.fields.parent = { key: parentKey };
-        // }
-
-        // לוג: הצגת הנתונים שנשלחים ל-JIRA
+        // Log: Display the payload being sent to JIRA
         console.log('Payload being sent to JIRA:', JSON.stringify(payload, null, 2));
 
-        // קריאת ה-API ב-JIRA
+        // API call to JIRA
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -59,7 +53,7 @@ export async function createJiraIssue(projectKey, issueType, summary, Descriptio
             body: JSON.stringify(payload),
         });
 
-        // לוג: הצגת התגובה מ-JIRA
+        // Log: Display the response from JIRA
         const data = await response.json();
         console.log('JIRA Response:', data);
 
@@ -67,12 +61,11 @@ export async function createJiraIssue(projectKey, issueType, summary, Descriptio
             throw new Error(`Failed to create issue: ${response.status} - ${data.errorMessages}`);
         }
 
-        // אם הכל הצליח, מחזירים את מפתח המשימה שנוצרה
+        // If successful, return the key of the created issue
         console.log(`${issueType} created successfully:`, data);
-        return data.key; // מחזיר את המפתח של המשימה שנוצרה
+        return data.key; // Return the key of the created issue
 
     } catch (error) {
         console.error('Error creating issue:', error.message);
     }
 }
-

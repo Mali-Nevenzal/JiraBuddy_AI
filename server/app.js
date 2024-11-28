@@ -2,28 +2,28 @@ import express from 'express';
 import cors from 'cors';
 import { generateQuiz } from './AIIntegration.js';
 import { createJiraIssue } from './JIRAIntegration.js';
+
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// מסלול לטיפול בבקשות ל-Gemini
 app.post('/ai', async (req, res) => {
   try {
-    // חילוץ השדות מהבקשה
+    // Extract fields from the request
     const { projectName, assignee, type, taskDescription } = req.body;
 
-    // בדיקת תקינות השדות
+    // Validate the required fields
     if (!taskDescription || !type || !assignee || !projectName) {
       return res.status(400).json({ error: "Missing required fields: taskDescription, type, assignee, projectName" });
     }
 
-    // קריאה לפונקציה generateQuiz עם הפרמטרים
+    // Call the generateQuiz function with the provided parameters
     const quizResult = await generateQuiz(taskDescription, type, assignee, projectName);
 
-    // שליחת התוצאה בחזרה ללקוח
+    // Send the result back to the client
     res.status(200).json(quizResult);
   } catch (error) {
-    console.error('Error in /gemini route:', error.message);
+    console.error('Error in /ai route:', error.message);
     res.status(500).json({ error: "Failed to process the request" });
   }
 });
@@ -41,18 +41,17 @@ app.post('/jira', async (req, res) => {
       return res.status(400).json({ error: "Children is not iterable (must be an array)" });
     }
 
-    // יצירת פרויקט ראשי
     const projectKey = await createJiraIssue(Project, 'Project', Summary, Description, Assignee);
 
     const createdIssues = new Set([projectKey]);
 
-    // פונקציה רקורסיבית ליצירת EPICs, STORIES ו-TASKS
+    // Recursive function to create EPICs, STORIES, and TASKS
     async function processIssues(issues, parentKey = null) {
       for (const issue of issues) {
         const issueType = issue['Issue type'] || 'Task';
-        const issueParentKey = issueType === 'Epic' ? null : parentKey || projectKey; // EPICs לא צריכים הורה
+        const issueParentKey = issueType === 'Epic' ? null : parentKey || projectKey; // EPICs do not need a parent
 
-        // אם המשימה לא נוצרה עדיין
+        // If the issue has not been created yet
         if (!createdIssues.has(issue.Summary)) {
           const issueKey = await createJiraIssue(
             issue.Project,
@@ -63,9 +62,9 @@ app.post('/jira', async (req, res) => {
             issueParentKey
           );
 
-          createdIssues.add(issue.Summary); // הוספה למעקב למניעת כפילות
+          createdIssues.add(issue.Summary); // Add to tracking to avoid duplicates
 
-          // אם יש ילדים, להריץ את הפונקציה עליהם
+          // If there are children, process them recursively
           if (issue.children && Array.isArray(issue.children)) {
             await processIssues(issue.children, issueKey);
           }
@@ -73,14 +72,14 @@ app.post('/jira', async (req, res) => {
       }
     }
 
-    // יצירת EPICs ראשית, ואז סיפורים ומשימות
+    // Create EPICs first, followed by STORIES and TASKS
     const epics = children.filter(child => child['Issue type'] === 'Epic');
     const nonEpics = children.filter(child => child['Issue type'] !== 'Epic');
 
-    // תהליך יצירת ה-EPICs
+    // Process EPIC creation
     await processIssues(epics);
 
-    // תהליך יצירת המשימות והסיפורים
+    // Process task and story creation
     await processIssues(nonEpics);
 
     res.status(200).json({ message: 'Issues created successfully!' });
@@ -89,7 +88,7 @@ app.post('/jira', async (req, res) => {
   }
 });
 
-// הפעלת השרת
+// Start the server
 app.listen(8081, (err) => {
   if (err) {
     console.error("Error starting server:", err);
