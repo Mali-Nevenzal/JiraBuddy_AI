@@ -39,9 +39,6 @@ export async function createJiraIssue(projectKey, issueType, summary, Descriptio
             },
         };
 
-        // Log: Display the payload being sent to JIRA
-        console.log('Payload being sent to JIRA:', JSON.stringify(payload, null, 2));
-
         // API call to JIRA
         const response = await fetch(url, {
             method: 'POST',
